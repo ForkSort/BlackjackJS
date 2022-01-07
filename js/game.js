@@ -322,15 +322,14 @@ class Player {
      * -     3: {"value":{"soft":19,"hard":19},"cards":"Kd","baseBet":6} // splitFroms nylig trukket kort
      * - ]; // splitFroms, splitTos rekkefølge er byttet for å tilfredstille BJ regler, siste hånd skal spilles først.
      */
-    split() { // need to fix this one
+    split() {
         if (game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canSplit(handNum)) return false; // sjekk om vi passerer alle canSplit forutsetninger
         this.balance -= this.baseBet; // juster balance
-
         // instansier en ny hånd, konstruer med paremetere: det siste kortet fra hånden: 'handNum', splitFrom satt til 'handNum' og baseBet satt till baseBet
         this.hands.push(new Hand(handNum, this.baseBet, this.hands[handNum].removeLastCard())); // push dette ^ som ett nytt element i this.hands
-
+        
         return [ 
             { // splitFrom:
                 value: Object.assign({}, this.hands[handNum].value), // hånd-verdi, bruker Obj.assign fordi vi trenger verdien istedet for referansen.
