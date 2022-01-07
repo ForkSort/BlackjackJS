@@ -250,7 +250,6 @@ class Player {
     /**
      * Player Hit. Trekker ett kort til selectHand. 
      * - dersom det nye kortet øker hand.bestValue > 21 vil open returnere closed, og da er dette håndet stengt for flere handlinger.
-     * 
      * - Forutsetninger: a) #state: "playersTurn" b) canHit() vilkår.
      * @returns {Object} {handNum: dennehånd, splitFrom: håndnummer|-1 card: nye-kortet, value: {soft: verdi, hard: verdi}, open: open/closed}
      */
@@ -286,7 +285,7 @@ class Player {
         if (game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canDouble(handNum)) return false;
-        this.balance -= this.baseBet;// << this doesnt work for multiple hands!!!
+        this.balance -= this.baseBet;
         this.hands[handNum].baseBet *= 2;
         this.hands[handNum].open = false;
         return {
