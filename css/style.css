@@ -1,0 +1,588 @@
+/* ===================
+    General
+   =================== */
+* {
+    margin-inline: 0; 
+    box-sizing: border-box;
+}
+html {
+    color: #ffa;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background-color: #201; 
+    overflow: hidden;
+}
+button {    
+    font-size: 1.3125rem;
+    box-shadow: rgba(230, 230, 230, 0.35) 0px 10px 6px -4px inset, rgba(0, 0, 0, 0.63) 0px -4px 12px 4px inset;
+}
+h1, h2, h3, h4, h5, h6 {
+    text-align: center;
+}
+h1 {
+    color: orange;
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 3px 3px 2px #000;
+}
+h3 {
+    color: #ddd;
+    font-size: 1.1rem;
+    font-weight: 400;
+    height: 1.625rem;
+    letter-spacing: 0.19rem;
+    text-shadow: 2px 2px 2px #000;
+}
+p {
+    text-align: center;
+    letter-spacing: 0.1rem;
+    text-shadow: rgb(0, 0, 0) 1px 1px 1px;
+}
+/* ===================
+    Game containers
+   =================== */
+.table-top { /* Toppen av blackjack bord */
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding-top: 3%;
+    width: 92.5%;
+    height: 90%; 
+    background-color: rgb(29, 95, 46);
+    border-bottom-left-radius: 50%;  
+    border-bottom-right-radius: 50%; 
+    border-top-left-radius: 12%;
+    border-top-right-radius: 12%;
+    -webkit-box-shadow: 5px 5px 5px 0px #000, inset 4px 4px 15px 0px #000000, 0px 0px 15px 5px rgba(0,0,0,0); 
+    box-shadow: 0px 5px 15px 0px #000, inset 0px -14px 45px 0px #000, 0px 0px 15px 5px rgba(0,0,0,0);
+    
+}
+.table-border { /* detalj-kant rundt bordet */
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding-top: 2%;
+    width: 99%;
+    height: 99%; 
+    background-color: rgb(46, 38, 28);
+    border-bottom-left-radius: 50%;  
+    border-bottom-right-radius: 50%;
+    border-top-left-radius: 12%;
+    border-top-right-radius: 12%;
+    -webkit-box-shadow: 5px 5px 5px 0px #000, inset 4px 4px 15px 0px #000000, 0px 0px 15px 5px rgba(0,0,0,0); 
+    box-shadow: 0px 5px 15px 0px #000, inset 0px -14px 45px 0px #000, 0px 0px 15px 5px rgba(0,0,0,0);
+    margin-top: -4%;
+    overflow: clip;
+}
+.table-side {
+    width: 20%;
+    font-size: 0.75rem;
+    font-weight: bolder;
+}
+.cards-used { /* topleft: holder brukte kort. */
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    transform: rotateZ(-15deg);
+    margin-bottom: 12%;
+}
+.cards-used > div { /* hver brukte kort */
+    transform: translate(0, 0);
+    width: 60%;
+    aspect-ratio: 0.8; 
+    background-color: #edc;
+    border-radius: 5%;
+    background-image: url("../img/cards/RED_BACK.svg");
+    background-size: 100% 100%;
+    margin: 0 -25%;
+    box-shadow: rgb(0, 0, 0) -1px 1px 1px;
+    animation: 0.25s ease-out 0s 1 cardflip;
+}
+.cards-used > div:nth-child(2) { /* hver nte brukte kort */
+    transform: translate(-19%, -3%);
+}
+.cards-used > div:nth-child(3) { /* hver nte brukte kort */
+    transform: translate(-38%, -6%);
+}
+.cards-used > div:nth-child(4) { /* hver nte brukte kort */
+    transform: translate(-57%, -9%);
+}
+.cards-used > div:nth-child(5) { /* hver nte brukte kort */
+    transform: translate(-76%, -12%);
+}
+.chips-house { /* (ikke implementer) top center:  */
+    top: 4%;
+    width: 50%;
+    height: 15%;
+}
+.cards-shoe { /* topright: holder card-shoe. */
+    width: 80%;
+    display: flex;
+    justify-content: end;
+    transform: rotateZ(-45deg);
+    margin-bottom: 12%;
+}
+.cards-shoe > div { /* hver shoe kort */
+    transform: translate(-1%, 0);
+    width: 60%;
+    aspect-ratio: 0.8; 
+    background-color: #edc;
+    border-radius: 5%;
+    background-image: url("../img/cards/RED_BACK.svg");
+    background-size: 100% 100%;
+    margin: 0 -25%;
+    box-shadow: rgb(0, 0, 0) 1px 1px 1px;
+    animation: 0.25s ease-out 0s 1 cardflip;
+}
+.cards-shoe > div:nth-child(2) { /* hver nte shoe kort */
+    transform: translate(-22%, 0%);
+}
+.cards-shoe > div:nth-child(3) { /* hver nte shoe kort */
+    transform: translate(-44%, 0%);
+}
+.cards-shoe > div:nth-child(4) { /* hver nte shoe kort */
+    transform: translate(-66%, 0%);
+}
+.cards-shoe > div:nth-child(5) { /* hver nte shoe kort */
+    transform: translate(-88%, 0%);
+}
+.dealer { /* holder dealerns kort og hånd verdi */
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    left: auto;
+    top: 5%;
+    width: 60%;
+}
+.game-outcome { /* (ikke implementert) */
+    border: 2px solid red;
+    width: 100%;
+    height: 5%;
+    position: absolute;
+    left: auto;
+    top: 45%;
+}
+.player-chips { /* bottom left: spillerens: 'balance' and 'bet' */
+    width: 14%; /* was 12 */
+    height: 20%;
+    position: absolute;
+    left: 20%;
+    bottom: 25%;
+    display: flex;
+    flex-wrap: wrap;
+    z-index: 1; /* makes them clickable */
+    align-content: flex-start;
+}
+.player-hand { /* bottom: spiller-hånd */
+    display: flex;
+    align-content: center;
+    flex-flow: row;
+    justify-content: center;
+    width: 60%;
+    height: 33%;
+    bottom: 15%;
+    left: auto;
+}
+.player-hand-active {
+    outline: 2px dotted orange;
+}
+.cards { /* hånd-wrapper */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    width: 50%;
+    max-width: 25%;
+}
+.card { /* hver kort */
+    display: block;
+    width: 60%;
+    aspect-ratio: 0.8; 
+    background-color: #edc;
+    border-radius: 5%;
+    background-image: url("../img/cards/RED_BACK.svg");
+    background-size: 100% 100%;
+    margin: 0 -25%;
+    transform: rotateZ(2deg); 
+    box-shadow: rgb(0, 0, 0) -1px 1px 1px;
+    animation: 0.25s ease-out 0s 1 cardflip;
+}
+@keyframes cardflip { /* kort-flip animasjon */
+    0% {
+        transform: rotateY( 180deg) rotateZ(-2deg);
+    }
+    100% {
+        transform: rotateY( 0deg) rotateZ(2deg);
+    }
+}
+.card-flip { /* kort-flip animasjon */
+    transform: rotateY( 180deg ) ;
+    background-image: url("../img/cards/RED_BACK.svg");
+    transition: all 0.5s;
+}
+#rules p { /* basic rules tekst  */
+    font-size: 0.625rem;
+    margin: 0;
+}
+@supports not (aspect-ratio: 0.8) { /* fix for nettlesere som ikke kan bruke: aspect-ratio */
+  .card::before {
+    float: left;
+    padding-top: 120%;
+    content: "";
+  }
+  .card::after {
+    display: block;
+    content: "";
+    clear: both;
+  }
+}
+/* ===================
+    Buttons
+   =================== */
+.btn {
+    width: 5em;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+    color: #ffa;
+    background-color: #987;
+    border: 3px solid #665; 
+    border-radius: 0.5em;
+    text-shadow: 1px 1px 1px #000;
+    margin: 0.1em;
+    padding: 0.5em;
+}
+.btn:hover,
+.btn:active {
+    cursor: pointer;
+    text-shadow: 0px 0px 2px #aaa;
+    filter: saturate(200%);
+}
+.btn-round {
+    font-size: 1rem;
+    border-radius: 50%;
+    width: 3.25em;
+    height: 3.25em;
+    padding: 0;
+}
+.hand-buttons {
+    order: 1;
+    display:flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+#btn-new-game {
+    background: #1a1;
+    border-color: #040;
+}
+#btn-menu {
+    background: #623;
+    border-color: #412;
+    width: fit-content;
+    font-size: 1rem;
+}
+#btn-hit {
+    background: #1a1;
+    border-color: #040;
+}
+#btn-stand {
+    background: #a11;
+    border-color: #400;
+}
+#btn-double {
+    background: #11a;
+    border-color: #004;
+}
+#btn-split {
+    background: #188;
+    border-color: #044;
+}
+#btn-deal {
+    background: #1a1;
+    border-color: #040;
+}
+#btn-rebet {
+    background: #a61;
+    border-color: #421;
+}
+#btn-clear {
+    background: #16a;
+    border-color: #224;
+}
+/* ===================
+    Texts
+   =================== */
+.table-game-rules { /* center: ikke i bruk */
+    position: absolute;
+    left: auto;
+    top: 46%;
+    color: #ddd;
+    text-align: center;
+    border-bottom: #ddd solid 1px;
+    border-top: #ddd solid 1px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    height: 1.625rem;
+    letter-spacing: 0.25rem;
+    text-shadow: 1px 1px 1px #000;
+}
+.hand-score { /* viser verdi, i hver hånd */
+    display: block;
+    width: 100%;
+    color: orange;
+    font-size: 2rem;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 3px 3px 2px #000;
+    order: -1; /* put element at beginning */
+}
+.hand-won { /* vinner tekst styling (i hver hånd) */
+    width: 100%;
+    display: block;
+    color: #0FA;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 3px 3px 2px #000;
+    order: 1;
+    margin-top: 0;
+}
+.hand-bet { /* bet tekst styling (i hver hånd) */
+    display: block;
+    color: #A00;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 2px 2px 2px #000;
+}
+.player-bet { /* inni .player-chips: viser totalbet */
+    color: #ffa;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 1rem;
+    width: 100%;
+    letter-spacing: 0.1rem;
+    text-shadow: 1px 1px 1px #000;
+}
+#dealer-hand-score {
+    order: 1;
+}
+/* ===================
+    Utility classes
+   =================== */
+.flex-break { /* wrap-break for flex wrapper */
+    flex-basis: 100%;
+    height: 0;
+}
+.main-menu { /* hoved meny */
+    background-color:rgba(0, 0, 0, 0.63);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.nav-menu { /* bottom: meny (vises mens spill er i gang) */
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 15%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+.menu-left { /* side-del av nav-menu */
+    width: fit-content;
+    min-width: 10%;
+    display: flex;
+    align-items: center;
+    padding: 9px;
+    margin: 0;
+    gap: 10px
+}
+.menu-center { /* hoved-del av nav-menu */
+    width: 80%;
+    display: flex;
+    justify-content: center;
+}
+.hide { /* skjul */
+    display: none;
+}
+/* ===================
+    Card images
+   =================== */
+.card-back {
+    /* background-image: repeating-linear-gradient(45deg,#edc,#edc 10px,#488 10px,#488 15px); */
+    background-image: url("../img/cards/RED_BACK.svg");
+}
+.card-double {
+    rotate: -90deg;
+}
+.card-2c {
+    background-image: url("../img/cards/2C.svg");
+}
+.card-2d {
+    background-image: url("../img/cards/2D.svg");
+}
+.card-2h {
+    background-image: url("../img/cards/2H.svg");
+}
+.card-2s {
+    background-image: url("../img/cards/2S.svg");
+}
+.card-3c {
+    background-image: url("../img/cards/3C.svg");
+}
+.card-3d {
+    background-image: url("../img/cards/3D.svg");
+}
+.card-3h {
+    background-image: url("../img/cards/3H.svg");
+}
+.card-3s {
+    background-image: url("../img/cards/3S.svg");
+}
+.card-4c {
+    background-image: url("../img/cards/4C.svg");
+}
+.card-4d {
+    background-image: url("../img/cards/4D.svg");
+}
+.card-4h {
+    background-image: url("../img/cards/4H.svg");
+}
+.card-4s {
+    background-image: url("../img/cards/4S.svg");
+}
+.card-5c {
+    background-image: url("../img/cards/5C.svg");
+}
+.card-5d {
+    background-image: url("../img/cards/5D.svg");
+}
+.card-5h {
+    background-image: url("../img/cards/5H.svg");
+}
+.card-5s {
+    background-image: url("../img/cards/5S.svg");
+}
+.card-6c {
+    background-image: url("../img/cards/6C.svg");
+}
+.card-6d {
+    background-image: url("../img/cards/6D.svg");
+}
+.card-6h {
+    background-image: url("../img/cards/6H.svg");
+}
+.card-6s {
+    background-image: url("../img/cards/6S.svg");
+}
+.card-7c {
+    background-image: url("../img/cards/7C.svg");
+}
+.card-7d {
+    background-image: url("../img/cards/7D.svg");
+}
+.card-7h {
+    background-image: url("../img/cards/7H.svg");
+}
+.card-7s {
+    background-image: url("../img/cards/7S.svg");
+}
+.card-8c {
+    background-image: url("../img/cards/8C.svg");
+}
+.card-8d {
+    background-image: url("../img/cards/8D.svg");
+}
+.card-8h {
+    background-image: url("../img/cards/8H.svg");
+}
+.card-8s {
+    background-image: url("../img/cards/8S.svg");
+}
+.card-9c {
+    background-image: url("../img/cards/9C.svg");
+}
+.card-9d {
+    background-image: url("../img/cards/9D.svg");
+}
+.card-9h {
+    background-image: url("../img/cards/9H.svg");
+}
+.card-9s {
+    background-image: url("../img/cards/9S.svg");
+}
+.card-10c {
+    background-image: url("../img/cards/10C.svg");
+}
+.card-10d {
+    background-image: url("../img/cards/10D.svg");
+}
+.card-10h {
+    background-image: url("../img/cards/10H.svg");
+}
+.card-10s {
+    background-image: url("../img/cards/10S.svg");
+}
+.card-Jc {
+    background-image: url("../img/cards/JC.svg");
+}
+.card-Jd {
+    background-image: url("../img/cards/JD.svg");
+}
+.card-Jh {
+    background-image: url("../img/cards/JH.svg");
+}
+.card-Js {
+    background-image: url("../img/cards/JS.svg");
+}
+.card-Qc {
+    background-image: url("../img/cards/QC.svg");
+}
+.card-Qd {
+    background-image: url("../img/cards/QD.svg");
+}
+.card-Qh {
+    background-image: url("../img/cards/QH.svg");
+}
+.card-Qs {
+    background-image: url("../img/cards/QS.svg");
+}
+.card-Kc {
+    background-image: url("../img/cards/KC.svg");
+}
+.card-Kd {
+    background-image: url("../img/cards/KD.svg");
+}
+.card-Kh {
+    background-image: url("../img/cards/KH.svg");
+}
+.card-Ks {
+    background-image: url("../img/cards/KS.svg");
+}
+.card-Ac {
+    background-image: url("../img/cards/AC.svg");
+}
+.card-Ad {
+    background-image: url("../img/cards/AD.svg");
+}
+.card-Ah {
+    background-image: url("../img/cards/AH.svg");
+}
+.card-As {
+    background-image: url("../img/cards/AS.svg");
+}

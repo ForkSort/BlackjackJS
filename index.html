@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Blackjack</title>
+</head>
+<body>
+    <div class="table-border">
+        <div class="table-top">
+            <div class="table-side">
+                <div class="cards-used"></div>
+                <p>Cards used: <span id="cards-used"></span></p>
+            </div>
+            <div class="chips-house"></div>
+            <div class="table-side">
+                <div class="cards-shoe"></div>
+                <p>Cards left: <span id="cards-left"></span></p>
+                <div id="rules"></div>
+            </div>
+            <div class="flex-break"></div>
+            <div class="dealer">
+                <div class="cards" id="dealer-hand"></div>
+            </div>
+                <div class="table-game-rules"></div>
+            <div class="player-hand"></div>
+        </div> <!-- / table-top -->
+    </div> <!-- / table-border -->
+    <div class="main-menu" id="main-menu">
+        <h1>Blackjack</h1>
+        <h3>Want to play a round?</h3>
+        <button class="btn" id="btn-new-game">New game</button>
+    </div>
+    <div class="nav-menu hide" id="nav-menu">
+        <div class="menu-left">
+            <p>Balance<br>$<span id="player-balance"></span></p>
+            <p>Bet <br>$<span id="player-bet"></span></p>
+        </div><div class="menu-center">
+            <div id="bet-buttons">
+                <button class="btn btn-round" id="btn-bet-1">$1</button>
+                <button class="btn btn-round" id="btn-bet-5">$5</button>
+                <button class="btn btn-round" id="btn-bet-25">$25</button>
+                <button class="btn btn-round" id="btn-bet-50">$50</button>
+                <button class="btn btn-round" id="btn-deal">Deal</button>
+                <button class="btn btn-round" id="btn-rebet">Rebet</button>
+                <button class="btn btn-round" id="btn-clear">Clear</button>
+            </div>
+            <div id="hand-buttons"></div>
+        </div>
+        <div class="menu-left"><button class="btn" id="btn-menu">menu</button></div>
+    </div>
+</body>
+<script src="js/game.js"></script>
+<script src="js/app.js"></script>
+</html>
