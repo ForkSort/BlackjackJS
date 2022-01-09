@@ -241,6 +241,9 @@ p {
     clear: both;
   }
 }
+.perspective-3d { /* endre perspekiv til 3d */
+    transform: perspective(900px) rotateX(45deg);
+}
 /* ===================
     Buttons
    =================== */

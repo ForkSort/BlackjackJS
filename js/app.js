@@ -6,7 +6,8 @@ const mainMenu  = document.getElementById("main-menu");
 const btnNewGame  = document.getElementById("btn-new-game");
 const navMenu  = document.getElementById("nav-menu");
 const btnMenu  = document.getElementById("btn-menu");
-/* hoved-meny events */
+const btn2d3d  = document.getElementById("btn-2d3d");
+/* hoved-meny & generelle-meny events */
 btnNewGame.addEventListener("click", function() { // starter newGame()
     toggleVisibility(mainMenu);
     toggleVisibility(navMenu,1);
@@ -16,6 +17,9 @@ btnMenu.addEventListener("click", function() { // viser hoved-meny
     toggleVisibility(mainMenu,1);
     toggleVisibility(navMenu);
     removeAllChildren(handButtons);
+});
+btn2d3d.addEventListener("click", function() { // toogle 2d/3d view
+    document.querySelector(".table-border").classList.toggle("perspective-3d");
 });
 /* spill-relaterte elementer */
 const betButtons = document.getElementById("bet-buttons");
@@ -34,7 +38,7 @@ const cardsUsedElCardEl = document.querySelector(".cards-used");
 function toggleVisibility(prop, hide = false) { // vis/skjul prop
     hide 
         ? prop.classList.remove("hide")
-        : prop.classList.add("hide")
+        : prop.classList.add("hide");
 }
 function createElement(className, id, elementType = 'div', content, children = undefined) { // lag ett element
 
