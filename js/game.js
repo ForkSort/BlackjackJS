@@ -1,7 +1,7 @@
 'use strict';
 /** Game class - Blackjack kjerne. 
  * Er i hovedsak bare en primitiv "state-machine", den delegerer mesteparten av logikk til instanser av Deck(), Dealer(), Player(). */
-class Game {
+ export default class Game {
     #rules;
     #state;
     players = [];
@@ -15,8 +15,10 @@ class Game {
         this.#rules.maxbet = minbet*50;
         this.#state = "init"; // set state "init"
         this.deck = new Deck(this.#rules.decks);
-        this.dealer = new Dealer();
-        this.players.push(new Player());
+        // vi instansierer Dealer() og player med this, fordi de trenger noen properties (f.eks rules,state) og methods
+        // Sansynligvis ville vært bedre å bare sende bare det vi trenger (f.eks bare this.rules) istedet for hele game-instansen.
+        this.dealer = new Dealer(this); 
+        this.players.push(new Player(this));
     }
     get rules() {
         return this.#rules;
@@ -38,7 +40,6 @@ class Game {
     /**
      * Deler ut de første kortene. I klokkevis rekkefølge: 1-kort til hver spiller og 1-kort til dealeren (med verdi-side opp), deretter 1-kort til hver spiller (med verdi-side opp), og 1-kort til dealeren med verdi-side ned.
      * - Forutsetninger: a) #state: "deal"
-     * - Side-effekter: Setter #state til: "peek". Flytter kort fra deck.shoe til deck.inplay
      * @returns {Object} 
      *  - {playersCard1: [{card: v value: v}...]}
      * - "dealerCard1":{card: v, value: v},
@@ -59,7 +60,7 @@ class Game {
             // loop gjennom spillere, begynn med siste spiller, og del ut kort til hver.
             for (let i = this.players.length-1; i >= 0; i--) {
                 result[`playersCard${(this.dealer.hand.cards.length%2)+1}`].push(
-                    {card: this.players[i].hands[0].addCard(game.deck.next()).card(),
+                    {card: this.players[i].hands[0].addCard(this.deck.next()).card(),
                     value: Object.assign({}, this.players[i].hands[0].value)
                 });
             }
@@ -67,10 +68,10 @@ class Game {
             // Og så, addCard() oppdaterer hand.value vanligvis, men hvis parameter 2 er false da gjør den ikke det. 'x.length%2' er false dersom x er ett partall da bruker vi det her.
             result[`dealerCard${(this.dealer.hand.cards.length%2)+1}`] =
                     {card: this.dealer.hand
-                    .addCard(game.deck.next(),!this.dealer.hand.cards.length%2) // sett det andre parameteret til addCard() til false for kort nr2.
+                    .addCard(this.deck.next(),!this.dealer.hand.cards.length%2) // sett det andre parameteret til addCard() til false for kort nr2.
                     .card(this.dealer.hand.cards.length%2),
                     value: Object.assign({}, this.dealer.hand.value)
-            };  // sett det andre parameteret til addCard() til false for kort nr2.
+            };
         }
         return result;
     }
@@ -93,8 +94,8 @@ class Game {
     }
     /** Midlertidig løsning. */
     playerDone() {
-        if (game.#state !== "playersTurn") return false;
-        game.#state = "dealersTurn";
+        if (this.#state !== "playersTurn") return false;
+        this.#state = "dealersTurn";
 
         return this.dealer.dealerTurn();
     }
@@ -107,7 +108,7 @@ class Game {
      * - hver hands er en objekt som innteholder kort[], besteverdi, baseBet og gevinst
      */
     determineWinner() {
-        if (game.state !== "dealersTurn") return false;
+        if (this.state !== "dealersTurn") return false;
         /**
          * initialiser result objektet 
          * her lagrer vi dealerens kort og dens beste-verdi. Og for hver spiller lagrer vi basebet, totalbet, totalwin, i tillegg lagrer vi
@@ -183,7 +184,8 @@ class Player {
     baseBet = 5;
     hands = [];
 
-    constructor() {
+    constructor(game) {
+        this.game = game
     }
     /** Setter baseBet
      * - Forutsetninger: a) #state: "init"
@@ -191,14 +193,14 @@ class Player {
      * @returns {number} baseBet
      */
     setBet(bet) {
-        if (game.state !== "init" || bet < 0) return false;
+        if (this.game.state !== "init" || bet < 0) return false;
         if (bet === "clear") this.baseBet = 0;
         else if (bet === "rebet") this.baseBet = this.lastBaseBet;
         else {
             bet = parseInt(bet);
-            if ( (this.balance >= (this.baseBet + bet)) && (this.baseBet + bet <= game.rules.maxbet) ) this.baseBet += bet;
-            else if (bet <= game.rules.maxbet && bet >= game.rules.minbet) this.baseBet = bet;
-            else this.baseBet = game.rules.minbet;
+            if ( (this.balance >= (this.baseBet + bet)) && (this.baseBet + bet <= this.game.rules.maxbet) ) this.baseBet += bet;
+            else if (bet <= this.game.rules.maxbet && bet >= this.game.rules.minbet) this.baseBet = bet;
+            else this.baseBet = this.game.rules.minbet;
         }
         return this.baseBet;
     }
@@ -209,12 +211,12 @@ class Player {
      * @returns {Object} {balance: players-balance, cardsleft}
      */
     deal() { 
-        if (game.state !== "init") return false;
-        if (this.baseBet < game.rules.minbet || this.baseBet > game.rules.maxbet || this.baseBet > this.balance) return false;
+        if (this.game.state !== "init") return false;
+        if (this.baseBet < this.game.rules.minbet || this.baseBet > this.game.rules.maxbet || this.baseBet > this.balance) return false;
         this.balance -= this.baseBet;
         this.lastBaseBet = this.baseBet;
         this.hands.push(new Hand(-1, this.baseBet)); 
-        return game.playerReady();
+        return this.game.playerReady();
     }
     /** @returns (Neste) valgbar hånd nummer eller -1 hvis ingen valgfrie hånd eksisterer. */
     get selectHand() { 
@@ -231,7 +233,7 @@ class Player {
      * @returns Dette håndets nummer og nexthand nummer. Hvis nexthand returnerer -1 betyr det at det er ingen flere valgbare hånd.
      */
     stand() {
-        if (game.state !== "playersTurn") return false;
+        if (this.game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canStand(handNum)) return false;
         this.hands[handNum].open = false; // close this hand.
@@ -254,13 +256,13 @@ class Player {
      * @returns {Object} {handNum: dennehånd, splitFrom: håndnummer|-1 card: nye-kortet, value: {soft: verdi, hard: verdi}, open: open/closed}
      */
     hit() { 
-        if (game.state !== "playersTurn") return false;
+        if (this.game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canHit(handNum)) return false;
         return {
             handNum: handNum,
             splitFrom: this.hands[handNum].splitFrom,
-            card: this.hands[handNum].addCard(game.deck.next()).card(), // trekk ett tilfeldig kort, vis les-bar verdi f.eks: "10c"
+            card: this.hands[handNum].addCard(this.game.deck.next()).card(), // trekk ett tilfeldig kort, vis les-bar verdi f.eks: "10c"
             value: this.hands[handNum].value,
             open: this.hands[handNum].open
         }
@@ -272,8 +274,8 @@ class Player {
      */
     canHit(handNum = 0) { // sjekk om hånden ...
         if (handNum < 0) return false; // ikke eksisterer 
-        if (this.hands[handNum].bestValue > 21 || this.hands[handNum].cards.length === game.rules.maxCardsPerHand) return false; // verdien av hånden overstiger 21 eller den har flere kort enn det rules.maxCardsPerHand tillater
-        if (!game.rules.split.hitSplitAces && handNum > 0 && this.hands[handNum].cards[0].value == "A") return false; // er ett split-hand, kortet er en 'A' mens rules.split.hitSplitAces tillater ikke å hitte split-aces
+        if (this.hands[handNum].bestValue > 21 || this.hands[handNum].cards.length === this.game.rules.maxCardsPerHand) return false; // verdien av hånden overstiger 21 eller den har flere kort enn det rules.maxCardsPerHand tillater
+        if (!this.game.rules.split.hitSplitAces && handNum > 0 && this.hands[handNum].cards[0].value == "A") return false; // er ett split-hand, kortet er en 'A' mens rules.split.hitSplitAces tillater ikke å hitte split-aces
         return true; 
     }
     /**
@@ -282,7 +284,7 @@ class Player {
      * @returns {Object} {handNum: dennehånd, splitFrom: håndnummer|-1, card: nye-kortet, bet: baseBet (doblet) value: {soft: verdi, hard: verdi}, balance: this.balance}
      */
     double() {
-        if (game.state !== "playersTurn") return false;
+        if (this.game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canDouble(handNum)) return false;
         this.balance -= this.baseBet;
@@ -291,7 +293,7 @@ class Player {
         return {
             handNum: handNum,
             splitFrom: this.hands[handNum].splitFrom,
-            card: this.hands[handNum].addCard(game.deck.next()).card(),
+            card: this.hands[handNum].addCard(this.game.deck.next()).card(),
             value: this.hands[handNum].value,
             bet: this.hands[handNum].baseBet,
             balance: this.balance
@@ -304,11 +306,11 @@ class Player {
      */
     canDouble(handNum = 0) { // sjekk om hånden ...
         if (handNum < 0) return false; // ikke eksisterer 
-        if (!game.rules.double.allow || this.hands[handNum].cards.length > 2) return false; // rules tillater ikke dobling eller denne hånden har mer enn 2 kort
-        if (handNum > 0 && !game.rules.double.aftersplit) return false; // er splittet hånd og reglene tillater ikke dobling etter splitting
+        if (!this.game.rules.double.allow || this.hands[handNum].cards.length > 2) return false; // rules tillater ikke dobling eller denne hånden har mer enn 2 kort
+        if (handNum > 0 && !this.game.rules.double.aftersplit) return false; // er splittet hånd og reglene tillater ikke dobling etter splitting
         if (this.balance < this.hands[handNum].baseBet) return false; // har ikke nok balance 
-        if (!game.rules.double.soft && (this.hands[handNum].value.hard < game.rules.double.range[0] || this.hands[handNum].value.hard > game.rules.double.range[1])) return false; // hard-verdien av hånden er utenfor rules.range mens soft-dobling er ikke tillatt 
-        if (game.rules.double.soft && (this.hands[handNum].value.soft < game.rules.double.range[0] || this.hands[handNum].value.soft > game.rules.double.range[1])) return false; // med soft-dobling tillatt, er denne hånden utenfor rules.range ?
+        if (!this.game.rules.double.soft && (this.hands[handNum].value.hard < this.game.rules.double.range[0] || this.hands[handNum].value.hard > this.game.rules.double.range[1])) return false; // hard-verdien av hånden er utenfor rules.range mens soft-dobling er ikke tillatt 
+        if (this.game.rules.double.soft && (this.hands[handNum].value.soft < this.game.rules.double.range[0] || this.hands[handNum].value.soft > this.game.rules.double.range[1])) return false; // med soft-dobling tillatt, er denne hånden utenfor rules.range ?
         return true;  
     }
     /**
@@ -323,7 +325,7 @@ class Player {
      * - ]; // splitFroms, splitTos rekkefølge er byttet for å tilfredstille BJ regler, siste hånd skal spilles først.
      */
     split() {
-        if (game.state !== "playersTurn") return false;
+        if (this.game.state !== "playersTurn") return false;
         const handNum = this.selectHand;
         if (!this.canSplit(handNum)) return false; // sjekk om vi passerer alle canSplit forutsetninger
         this.balance -= this.baseBet; // juster balance
@@ -343,12 +345,12 @@ class Player {
             }, // etter split, trekk ett kort til hver hånd... vi bruker motstatt rekkefølge fordi spilleren skal først spille splitTo-hånden
             { // splitTo 
                 value: this.hands[this.hands.length-1].value, // hånd-verdi inkluderer det nye kortet
-                card: this.hands[this.hands.length-1].addCard(game.deck.next()).card(), // ett nytt tilfeldig kort
+                card: this.hands[this.hands.length-1].addCard(this.game.deck.next()).card(), // ett nytt tilfeldig kort
                 baseBet: this.hands[this.hands.length-1].baseBet
             },
             { // splitFrom
                 value: this.hands[handNum].value, // hånd-verdi inkluderer det nye kortet
-                card: this.hands[handNum].addCard(game.deck.next()).card(), // ett nytt tilfeldig kort
+                card: this.hands[handNum].addCard(this.game.deck.next()).card(), // ett nytt tilfeldig kort
                 baseBet: this.hands[handNum].baseBet
             }
         ];
@@ -361,11 +363,11 @@ class Player {
     canSplit(handNum = 0) { // sjekk om hånden ...
         if (handNum < 0) return false; // ikke eksisterer 
         if (this.hands[handNum].cards.length > 2) return false; // har mer enn 2 kort
-        if (this.hands.length > game.rules.split.allow) return false; // har splittet flere ganger enn rules.split.allow
+        if (this.hands.length > this.game.rules.split.allow) return false; // har splittet flere ganger enn rules.split.allow
         if (this.hands[handNum].cards[0].rank !== this.hands[handNum].cards[1].rank) return false; // kortene er ikke samme rank
         if (this.balance < this.hands[handNum].baseBet) return false; // har ikke nok balance 
-        if (!game.rules.split.resplitAces && (this.hands[handNum] > 0 && this.hands[handNum].cards[0].rank === "A")) return false; // dette er en 'A', og dette er en resplit hånd, game.rules.split.resplitAces sier dette er ikke tillatt
-        if (game.rules.split.except === this.hands[handNum].cards[0].rank) return false; // er i unntaks-listen for splittbare kort (rules.split.except)
+        if (!this.game.rules.split.resplitAces && (this.hands[handNum] > 0 && this.hands[handNum].cards[0].rank === "A")) return false; // dette er en 'A', og dette er en resplit hånd, game.rules.split.resplitAces sier dette er ikke tillatt
+        if (this.game.rules.split.except === this.hands[handNum].cards[0].rank) return false; // er i unntaks-listen for splittbare kort (rules.split.except)
         return true; 
     }
 }
@@ -376,7 +378,8 @@ class AIplayer extends Player {
 /** Dealer class - dealer spilleren. Instansierer Hand() */
 class Dealer {
     hand;
-    constructor() {
+    constructor(game) {
+        this.game = game
         this.hand = new Hand();
     }
     /**
@@ -384,18 +387,18 @@ class Dealer {
      * @returns objekt med: 'dealerHits' (en array med alle dealrens kort og hånd-verdi for hvert kort) og 'wins' som inneholder objekter med output fra: determineWinner()
      */
     dealerTurn() {
-        if (game.state !== "dealersTurn") return false;
+        if (this.game.state !== "dealersTurn") return false;
         // oppdater hånd-verdien
         this.hand.updateValue();
         // initialiser result med hånd-verdier før 'hit-or-stand' loopen
         let result = [{card: this.hand.cards[1].card(), value: Object.assign({}, this.hand.value)}];
         // dealer skal bare hitte mens hand.value er mindre enn det reglene sier...
         while ((
-                (this.hand.value.soft <= 17 && game.rules.hitSoft17 && this.hand.value.soft < this.hand.value.hard) || this.hand.value.hard < 17) 
-                && this.hand.cards.length < game.rules.maxCardsPerHand) {
-                    result.push({card: this.hand.addCard(game.deck.next()).card(), value: Object.assign({},this.hand.value)})
+                (this.hand.value.soft <= 17 && this.game.rules.hitSoft17 && this.hand.value.soft < this.hand.value.hard) || this.hand.value.hard < 17) 
+                && this.hand.cards.length < this.game.rules.maxCardsPerHand) {
+                    result.push({card: this.hand.addCard(this.game.deck.next()).card(), value: Object.assign({},this.hand.value)})
         }
-        return {dealerHits: result, wins: game.determineWinner()};  
+        return {dealerHits: result, wins: this.game.determineWinner()};  
     }
 }
 /** Hand class - kontrollerer alle hånd. */
