@@ -1,3 +1,4 @@
+import Game from './game.js'
 'use strict';
 let game; // lagrer Game() instance
 let playerSeat = 0; // i denne versjon har vi bare ett spiller-sete, og det er 0
